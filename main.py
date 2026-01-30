@@ -50,14 +50,14 @@ def main():
         url = target["url"]
         filename = target["file"]
         
-        file_bridges = set()
+        existing_bridges = set()
         if os.path.exists(filename):
             try:
                 with open(filename, "r", encoding="utf-8") as f:
                     for line in f:
                         line = line.strip()
-                        if line:
-                            file_bridges.add(line)
+                        if line and "No bridges available" not in line:
+                            existing_bridges.add(line)
             except:
                 pass
 
@@ -73,7 +73,7 @@ def main():
                     lines = [line.strip() for line in raw_text.split("\n") if line.strip()]
                     
                     for line in lines:
-                        if line and not line.startswith("#"):
+                        if line and not line.startswith("#") and "No bridges available" not in line:
                             fetched_bridges.add(line)
                             
                             if line not in history:
@@ -87,16 +87,17 @@ def main():
         except Exception as e:
             log(f"Connection error for {filename}: {e}")
 
-        filtered_bridges = set()
-        for bridge in fetched_bridges:
-            if "No bridges available" not in bridge:
-                filtered_bridges.add(bridge)
-
-        if filtered_bridges:
+        all_bridges = existing_bridges.union(fetched_bridges)
+        
+        if all_bridges:
             with open(filename, "w", encoding="utf-8") as f:
-                for bridge in sorted(filtered_bridges):
+                for bridge in sorted(all_bridges):
                     f.write(bridge + "\n")
-            log(f"Updated {filename}: {len(filtered_bridges)} bridges.")
+            
+            if fetched_bridges:
+                log(f"Updated {filename}: {len(fetched_bridges)} new bridges added. Total: {len(all_bridges)}")
+            else:
+                log(f"Checked {filename}: No new bridges. Total: {len(all_bridges)}")
         else:
             with open(filename, "w", encoding="utf-8") as f:
                 f.write("")
