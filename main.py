@@ -95,13 +95,13 @@ def update_readme(stats):
 
 This repository automatically collects, validates, and archives Tor bridges. A GitHub Action runs every 3 hours to fetch new bridges from the official Tor Project.
 
-## ⚠️ Important Notes on IPv6 & WebTunnel
+## 🔥 Important Notes on IPv6 & WebTunnel
 
 1.  **IPv6 Instability:** IPv6 bridges are significantly fewer in number and are often more susceptible to blocking or connection instability compared to IPv4.
 2.  **WebTunnel Overlap:** WebTunnel bridges often use the same endpoint domain for both IPv4 and IPv6. Consequently, the IPv6 list is frequently identical to or a subset of the IPv4 list.
 3.  **Recommendation:** For the most reliable connection, **prioritize using IPv4 bridges**. Use IPv6 only if IPv4 is completely inaccessible on your network.
 
-## 📂 Bridge Lists
+## 🔥 Bridge Lists
 
 ### ✅ Tested & Active (Recommended)
 These bridges from the archive have passed a TCP connectivity test (3 retries, 10s timeout) during the last run.
@@ -112,7 +112,7 @@ These bridges from the archive have passed a TCP connectivity test (3 retries, 1
 | **WebTunnel** | [webtunnel_tested.txt]({REPO_URL}/webtunnel_tested.txt) | **{stats.get('webtunnel_tested.txt', 0)}** | [webtunnel_ipv6_tested.txt]({REPO_URL}/webtunnel_ipv6_tested.txt) | **{stats.get('webtunnel_ipv6_tested.txt', 0)}** |
 | **Vanilla** | [vanilla_tested.txt]({REPO_URL}/vanilla_tested.txt) | **{stats.get('vanilla_tested.txt', 0)}** | [vanilla_ipv6_tested.txt]({REPO_URL}/vanilla_ipv6_tested.txt) | **{stats.get('vanilla_ipv6_tested.txt', 0)}** |
 
-### 🕒 Fresh Bridges (Last 72 Hours)
+### 🔥 Fresh Bridges (Last 72 Hours)
 Bridges discovered within the last 3 days.
 
 | Transport | IPv4 (72h) | Count | IPv6 (72h) | Count |
@@ -121,7 +121,7 @@ Bridges discovered within the last 3 days.
 | **WebTunnel** | [webtunnel_72h.txt]({REPO_URL}/webtunnel_72h.txt) | **{stats.get('webtunnel_72h.txt', 0)}** | [webtunnel_ipv6_72h.txt]({REPO_URL}/webtunnel_ipv6_72h.txt) | **{stats.get('webtunnel_ipv6_72h.txt', 0)}** |
 | **Vanilla** | [vanilla_72h.txt]({REPO_URL}/vanilla_72h.txt) | **{stats.get('vanilla_72h.txt', 0)}** | [vanilla_ipv6_72h.txt]({REPO_URL}/vanilla_ipv6_72h.txt) | **{stats.get('vanilla_ipv6_72h.txt', 0)}** |
 
-### 📦 Full Archive (Accumulative)
+### 🔥 Full Archive (Accumulative)
 History of all collected bridges.
 
 | Transport | IPv4 (All Time) | Count | IPv6 (All Time) | Count |
@@ -130,13 +130,13 @@ History of all collected bridges.
 | **WebTunnel** | [webtunnel.txt]({REPO_URL}/webtunnel.txt) | **{stats.get('webtunnel.txt', 0)}** | [webtunnel_ipv6.txt]({REPO_URL}/webtunnel_ipv6.txt) | **{stats.get('webtunnel_ipv6.txt', 0)}** |
 | **Vanilla** | [vanilla.txt]({REPO_URL}/vanilla.txt) | **{stats.get('vanilla.txt', 0)}** | [vanilla_ipv6.txt]({REPO_URL}/vanilla_ipv6.txt) | **{stats.get('vanilla_ipv6.txt', 0)}** |
 
-## ⚙️ Automation Logic
+## 🔥 Automation Logic
 
 -   **Schedule:** Runs every 3 hours.
 -   **Testing:** Archive files are tested for TCP connectivity (3 retries, 10s timeout).
 -   **Retention:** `bridge_history.json` is cleaned every 30 days.
 
-## ⚠️ Disclaimer
+## 🔥 Disclaimer
 This project is for educational and archival purposes. Please use these bridges responsibly.
 """
     with open("README.md", "w", encoding="utf-8") as f:
