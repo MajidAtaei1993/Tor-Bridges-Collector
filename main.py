@@ -86,15 +86,16 @@ def main():
         except Exception as e:
             log(f"Connection error for {filename}: {e}")
 
-        new_for_file = fetched_bridges - file_bridges
-        if new_for_file:
-            file_bridges.update(new_for_file)
+        if fetched_bridges:
+            file_bridges.update(fetched_bridges)
             with open(filename, "w", encoding="utf-8") as f:
                 for bridge in sorted(file_bridges):
                     f.write(bridge + "\n")
-            log(f"Updated {filename}: {len(new_for_file)} new bridges added.")
+            log(f"Updated {filename}: {len(fetched_bridges)} bridges.")
         else:
-            log(f"Checked {filename}: No new unique bridges.")
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write("")
+            log(f"No bridges available for {filename}. File cleared.")
 
     cutoff_time = datetime.now() - timedelta(hours=24)
     recent_bridges = []
