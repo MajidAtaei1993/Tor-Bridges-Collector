@@ -130,11 +130,6 @@ History of all collected bridges.
 | **WebTunnel** | [webtunnel.txt]({REPO_URL}/webtunnel.txt) | **{stats.get('webtunnel.txt', 0)}** | [webtunnel_ipv6.txt]({REPO_URL}/webtunnel_ipv6.txt) | **{stats.get('webtunnel_ipv6.txt', 0)}** |
 | **Vanilla** | [vanilla.txt]({REPO_URL}/vanilla.txt) | **{stats.get('vanilla.txt', 0)}** | [vanilla_ipv6.txt]({REPO_URL}/vanilla_ipv6.txt) | **{stats.get('vanilla_ipv6.txt', 0)}** |
 
-## 🔥 Automation Logic
-
--   **Schedule:** Runs every 3 hours.
--   **Testing:** Archive files are tested for TCP connectivity (3 retries, 10s timeout).
--   **Retention:** `bridge_history.json` is cleaned every 30 days.
 
 ## 🔥 Disclaimer
 This project is for educational and archival purposes. Please use these bridges responsibly.
