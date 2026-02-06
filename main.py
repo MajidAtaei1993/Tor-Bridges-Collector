@@ -280,15 +280,7 @@ def update_readme(stats):
     
     readme_content = f"""# Tor Bridges Collector & Archive
 
-**Last Updated:** {timestamp}
 
-## 📊 Overall Statistics
-| Metric | Count |
-|--------|-------|
-| Total Bridges Collected | {total_bridges} |
-| Successfully Tested | {stats.get('total_tested', 0)} |
-| New Bridges (72h) | {stats.get('total_recent', 0)} |
-| History Retention | {HISTORY_RETENTION_DAYS} days |
 
 This repository automatically collects, validates, and archives Tor bridges. A GitHub Action runs every hour to fetch new bridges from the official Tor Project.
 
