@@ -25,65 +25,13 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Create bridges directory
-        run: |
-          mkdir -p bridges
-
       - name: Run Scraper
         run: python main.py
-
-      - name: Move files to bridges directory
-        run: |
-          shopt -s nullglob
-          
-          for file in *.txt *.json; do
-            if [[ "$file" != "README.md" && "$file" != "requirements.txt" ]]; then
-              echo "Moving $file to bridges/"
-              mv "$file" bridges/
-            fi
-          done
-
-      - name: Verify and count bridges
-        run: |
-          echo "📊 Bridge File Statistics:"
-          echo "=========================="
-          
-          total_count=0
-          working_count=0
-          recent_count=0
-          
-          for file in bridges/*.txt; do
-            if [ -f "$file" ]; then
-              count=$(wc -l < "$file" 2>/dev/null || echo "0")
-              filename=$(basename "$file")
-              
-              if [[ "$filename" == *"_tested.txt" ]]; then
-                working_count=$((working_count + count))
-                echo "✅ $filename: $count bridges"
-              elif [[ "$filename" == *"_72h.txt" ]]; then
-                recent_count=$((recent_count + count))
-                echo "🆕 $filename: $count bridges"
-              elif [[ "$filename" == *.txt && ! "$filename" == *"_tested.txt" && ! "$filename" == *"_72h.txt" ]]; then
-                total_count=$((total_count + count))
-                echo "📁 $filename: $count bridges"
-              fi
-            fi
-          done
-          
-          echo "=========================="
-          echo "📈 SUMMARY:"
-          echo "Total bridges: $total_count"
-          echo "Working bridges: $working_count"
-          echo "Recent bridges (72h): $recent_count"
 
       - name: Commit and Push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add bridges/ README.md
-          
-          timestamp=$(date -u +"%Y-%m-%d %H:%M UTC")
-          git commit -m "📡 Update bridges - $timestamp [skip ci]" || echo "No changes to commit"
-          
+          git add *.txt *.json README.md
+          git commit -m "Update bridges, stats and tested files [skip ci]" || echo "No changes to commit"
           git push
