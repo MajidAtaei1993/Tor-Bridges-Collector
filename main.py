@@ -454,11 +454,11 @@ def main():
         
         total_bridges = obfs4_total + webtunnel_total + vanilla_total + obfs4_ipv6 + webtunnel_ipv6 + vanilla_ipv6
         
-        caption = f"""*🔍 Tor Bridges Collector - Live Update*
+        caption = f"""* Tor Bridges Collector Update*
 
- *Source:* All bridges are fetched directly from the official Tor Project website (bridges.torproject.org) in real-time.
+ *Source:* All bridges are fetched directly from the official Tor Project website in real-time.
  
-📊 *Statistics:*
+ *Statistics:*
 
 *Full Archive (All Time):*
 • obfs4 IPv4: {obfs4_total} | IPv6: {obfs4_ipv6}
