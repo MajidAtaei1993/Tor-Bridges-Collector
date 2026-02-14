@@ -251,11 +251,11 @@ This repository automatically collects, validates, and archives Tor bridges. A G
 ### Tested & Active (Recommended)
 These bridges from the archive have passed a TCP connectivity test (3 retries, 10s timeout) during the last run.
 
-| Transport | IPv4 (Tested) | Count | IPv6 (Tested) | Count |
-| :--- | :--- | :--- | :--- | :--- |
-| **obfs4** | [obfs4_tested.txt]({REPO_URL}/bridge/obfs4_tested.txt) | **{stats.get('obfs4_tested.txt', 0)}** | [obfs4_ipv6_tested.txt]({REPO_URL}/bridge/obfs4_ipv6_tested.txt) | **{stats.get('obfs4_ipv6_tested.txt', 0)}** |
-| **WebTunnel** | [webtunnel_tested.txt]({REPO_URL}/bridge/webtunnel_tested.txt) | **{stats.get('webtunnel_tested.txt', 0)}** | [webtunnel_ipv6_tested.txt]({REPO_URL}/bridge/webtunnel_ipv6_tested.txt) | **{stats.get('webtunnel_ipv6_tested.txt', 0)}** |
-| **Vanilla** | [vanilla_tested.txt]({REPO_URL}/bridge/vanilla_tested.txt) | **{stats.get('vanilla_tested.txt', 0)}** | [vanilla_ipv6_tested.txt]({REPO_URL}/bridge/vanilla_ipv6_tested.txt) | **{stats.get('vanilla_ipv6_tested.txt', 0)}** |
+| Transport | IPv4 (Tested) | Count | 
+| :--- | :--- | :--- |
+| **obfs4** | [obfs4_tested.txt]({REPO_URL}/bridge/obfs4_tested.txt) | **{stats.get('obfs4_tested.txt', 0)}** |
+| **WebTunnel** | [webtunnel_tested.txt]({REPO_URL}/bridge/webtunnel_tested.txt) | **{stats.get('webtunnel_tested.txt', 0)}** |
+| **Vanilla** | [vanilla_tested.txt]({REPO_URL}/bridge/vanilla_tested.txt) | **{stats.get('vanilla_tested.txt', 0)}** |
 
 ### Fresh Bridges (Last 72 Hours)
 Bridges discovered within the last 3 days.
@@ -445,31 +445,43 @@ def main():
         obfs4_ipv6 = stats.get('obfs4_ipv6.txt', 0)
         webtunnel_ipv6 = stats.get('webtunnel_ipv6.txt', 0)
         vanilla_ipv6 = stats.get('vanilla_ipv6.txt', 0)
-        obfs4_ipv6_tested = stats.get('obfs4_ipv6_tested.txt', 0)
-        webtunnel_ipv6_tested = stats.get('webtunnel_ipv6_tested.txt', 0)
-        vanilla_ipv6_tested = stats.get('vanilla_ipv6_tested.txt', 0)
         obfs4_ipv6_recent = stats.get('obfs4_ipv6_72h.txt', 0)
         webtunnel_ipv6_recent = stats.get('webtunnel_ipv6_72h.txt', 0)
         vanilla_ipv6_recent = stats.get('vanilla_ipv6_72h.txt', 0)
         
-        caption = f"""*Tor Bridges Collector - Update*
+        total_bridges = obfs4_total + webtunnel_total + vanilla_total + obfs4_ipv6 + webtunnel_ipv6 + vanilla_ipv6
+        
+        caption = f"""*🔍 Tor Bridges Collector - Live Update*
+
+ *Source:* All bridges are fetched directly from the official Tor Project website.
+
+
+ *Statistics:*
 
 *Full Archive (All Time):*
-• obfs4 IPv4: {obfs4_total} | IPv6: {obfs4_ipv6}
-• WebTunnel IPv4: {webtunnel_total} | IPv6: {webtunnel_ipv6}
-• Vanilla IPv4: {vanilla_total} | IPv6: {vanilla_ipv6}
+• obfs4: {obfs4_total} IPv4 + {obfs4_ipv6} IPv6 = {obfs4_total + obfs4_ipv6} total
+• WebTunnel: {webtunnel_total} IPv4 + {webtunnel_ipv6} IPv6 = {webtunnel_total + webtunnel_ipv6} total
+• Vanilla: {vanilla_total} IPv4 + {vanilla_ipv6} IPv6 = {vanilla_total + vanilla_ipv6} total
 
-*Tested & Active:*
-• obfs4 IPv4: {obfs4_tested} | IPv6: {obfs4_ipv6_tested}
-• WebTunnel IPv4: {webtunnel_tested} | IPv6: {webtunnel_ipv6_tested}
-• Vanilla IPv4: {vanilla_tested} | IPv6: {vanilla_ipv6_tested}
+*Tested & Active (Recommended):*
+• obfs4: {obfs4_tested} bridges
+• WebTunnel: {webtunnel_tested} bridges
+• Vanilla: {vanilla_tested} bridges
 
-*Recent (Last 72h):*
-• obfs4 IPv4: {obfs4_recent} | IPv6: {obfs4_ipv6_recent}
-• WebTunnel IPv4: {webtunnel_recent} | IPv6: {webtunnel_ipv6_recent}
-• Vanilla IPv4: {vanilla_recent} | IPv6: {vanilla_ipv6_recent}
+*Recent (Last 72 Hours):*
+• obfs4: {obfs4_recent} IPv4 + {obfs4_ipv6_recent} IPv6
+• WebTunnel: {webtunnel_recent} IPv4 + {webtunnel_ipv6_recent} IPv6
+• Vanilla: {vanilla_recent} IPv4 + {vanilla_ipv6_recent} IPv6
 
-*Total Unique Bridges:* {obfs4_total + webtunnel_total + vanilla_total + obfs4_ipv6 + webtunnel_ipv6 + vanilla_ipv6}"""
+ *Total Unique Bridges:* {total_bridges}
+
+━━━━━━━━━━━━━━━━━━━━━━
+ *ZIP Contents:*
+• Full Archive/ - Complete bridge history
+• Recent 72h/ - Bridges from last 3 days
+• Tested/ - Verified working bridges
+
+ Note: IPv6 bridges are fewer and less stable than IPv4. For best results, use IPv4 bridges first."""
         
         send_to_telegram(zip_path, caption)
     
