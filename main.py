@@ -8,7 +8,6 @@ import ssl
 import time
 import ipaddress
 import zipfile
-import shutil
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -34,6 +33,7 @@ MAX_TEST_PER_TYPE = 500
 IS_GITHUB = os.getenv('GITHUB_ACTIONS') == 'true'
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+TELEGRAM_UPLOAD = os.getenv('TELEGRAM_UPLOAD', '').lower() == 'true'
 
 BRIDGE_DIR = "bridge"
 HISTORY_FILE = os.path.join(BRIDGE_DIR, "bridge_history.json")
@@ -234,26 +234,6 @@ def cleanup_history(history):
     }
     return new_history
 
-def copy_existing_files_to_bridge():
-    for target in TARGETS:
-        filename = target["file"]
-        source_path = filename
-        dest_path = os.path.join(BRIDGE_DIR, filename)
-        if os.path.exists(source_path) and not os.path.exists(dest_path):
-            try:
-                shutil.copy2(source_path, dest_path)
-                log(f"Copied {filename} to {BRIDGE_DIR}/")
-            except Exception as e:
-                log(f"Error copying {filename}: {e}")
-    
-    old_history = "bridge_history.json"
-    if os.path.exists(old_history) and not os.path.exists(HISTORY_FILE):
-        try:
-            shutil.copy2(old_history, HISTORY_FILE)
-            log(f"Copied bridge_history.json to {BRIDGE_DIR}/")
-        except Exception as e:
-            log(f"Error copying bridge_history.json: {e}")
-
 def update_readme(stats):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
     readme_content = f"""# Tor Bridges Collector & Archive
@@ -318,8 +298,6 @@ def send_to_telegram(file_path, caption):
         log(f"Telegram Error: {e}")
 
 def main():
-    copy_existing_files_to_bridge()
-    
     session = requests.Session()
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -427,7 +405,9 @@ def main():
     update_readme(stats)
     
     current_hour = datetime.now().hour
-    if current_hour == 0 and IS_GITHUB:
+    should_upload = (current_hour == 0 and IS_GITHUB) or (IS_GITHUB and TELEGRAM_UPLOAD)
+    
+    if should_upload:
         zip_name = "tor_bridges.zip"
         zip_path = os.path.join(BRIDGE_DIR, zip_name)
         
@@ -454,7 +434,7 @@ def main():
         webtunnel_ipv6 = stats.get('webtunnel_ipv6.txt', 0)
         vanilla_ipv6 = stats.get('vanilla_ipv6.txt', 0)
         
-        caption = f"""*Tor Bridges Collector - Midnight Update*
+        caption = f"""*Tor Bridges Collector - Update*
 
 *Full Archive (All Time):*
 • obfs4 (IPv4): {obfs4_total} bridges
