@@ -8,7 +8,6 @@ import ssl
 import time
 import ipaddress
 import zipfile
-import shutil
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -56,19 +55,15 @@ def is_valid_bridge_line(line):
 
 def extract_connection_info(line):
     line = line.strip()
-    
     if not line or len(line) < 5:
         return None, None, None
-    
     line_lower = line.lower()
-    
     if "obfs4" in line_lower:
         transport = "obfs4"
     elif "webtunnel" in line_lower or "https://" in line_lower:
         transport = "webtunnel"
     else:
         transport = "vanilla"
-    
     patterns = [
         (r'https?://\[([0-9a-fA-F:]+)\](?::(\d+))?', "ipv6"),
         (r'https?://([^/:]+)(?::(\d+))?', "domain"),
@@ -78,7 +73,6 @@ def extract_connection_info(line):
         (r'obfs4\s+([^:]+):(\d+)\s+', "obfs4"),
         (r'(\S+)\s+(\S+)\s+(\S+)', "fingerprint"),
     ]
-    
     for pattern, ptype in patterns:
         match = re.search(pattern, line, re.IGNORECASE)
         if match:
@@ -94,7 +88,6 @@ def extract_connection_info(line):
                 host = match.group(1)
                 port = "443" if "https" in line_lower else "80"
                 return host, int(port), transport
-    
     return None, None, transport
 
 def is_valid_ip(host):
@@ -114,13 +107,11 @@ def test_tcp_socket(host, port, timeout):
     try:
         sock = socket.create_connection((host, port), timeout=timeout)
         sock.settimeout(1)
-        
         try:
             sock.send(b"\x00")
             sock.recv(1)
         except:
             pass
-        
         sock.close()
         return True
     except:
@@ -133,16 +124,13 @@ def test_ssl_socket(host, port, timeout):
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         context.minimum_version = ssl.TLSVersion.TLSv1_2
-        
         ssl_sock = context.wrap_socket(sock, server_hostname=host)
         ssl_sock.settimeout(SSL_TIMEOUT)
-        
         try:
             ssl_sock.send(b"GET / HTTP/1.0\r\n\r\n")
             ssl_sock.recv(1024)
         except:
             pass
-        
         ssl_sock.close()
         return True
     except:
@@ -150,10 +138,8 @@ def test_ssl_socket(host, port, timeout):
 
 def advanced_connection_test(bridge_line):
     host, port, transport = extract_connection_info(bridge_line)
-    
     if not host or not port:
         return False
-    
     if transport == "webtunnel":
         test_func = test_ssl_socket
         timeout = CONNECTION_TIMEOUT
@@ -162,12 +148,9 @@ def advanced_connection_test(bridge_line):
         test_func = test_tcp_socket
         timeout = CONNECTION_TIMEOUT
         default_port = 9001 if transport == "obfs4" else 443
-    
     if port == 0:
         port = default_port
-    
     test_hosts = []
-    
     if is_valid_ip(host):
         test_hosts.append(host)
     else:
@@ -175,7 +158,6 @@ def advanced_connection_test(bridge_line):
         if resolved:
             test_hosts.append(resolved)
         test_hosts.append(host)
-    
     for test_host in test_hosts:
         for attempt in range(MAX_RETRIES):
             try:
@@ -183,49 +165,37 @@ def advanced_connection_test(bridge_line):
                     return True
             except:
                 pass
-            
             if attempt < MAX_RETRIES - 1:
                 time.sleep(0.3 * (attempt + 1))
-    
     return False
 
 def smart_bridge_filter(bridge_list, transport_type):
     if not bridge_list:
         return []
-    
     if len(bridge_list) > MAX_TEST_PER_TYPE:
         bridge_list = bridge_list[:MAX_TEST_PER_TYPE]
-    
     unique_bridges = []
     seen = set()
-    
     for bridge in bridge_list:
         key = re.sub(r'\s+', ' ', bridge.strip()).lower()
         if key not in seen:
             seen.add(key)
             unique_bridges.append(bridge)
-    
     return unique_bridges
 
 def batch_test_bridges(bridge_list, transport_type, batch_size=100):
     if not bridge_list:
         return []
-    
     filtered_bridges = smart_bridge_filter(bridge_list, transport_type)
-    
     if not filtered_bridges:
         return []
-    
     working_bridges = []
     total = len(filtered_bridges)
-    
     for i in range(0, total, batch_size):
         batch = filtered_bridges[i:i + batch_size]
         batch_working = []
-        
         with concurrent.futures.ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(batch))) as executor:
             future_to_bridge = {executor.submit(advanced_connection_test, bridge): bridge for bridge in batch}
-            
             for future in concurrent.futures.as_completed(future_to_bridge):
                 bridge = future_to_bridge[future]
                 try:
@@ -233,12 +203,9 @@ def batch_test_bridges(bridge_list, transport_type, batch_size=100):
                         batch_working.append(bridge)
                 except:
                     pass
-        
         working_bridges.extend(batch_working)
-        
         if len(batch_working) > 0:
             log(f"   Batch {i//batch_size + 1}: {len(batch_working)}/{len(batch)} bridges working")
-    
     return working_bridges
 
 def load_history():
@@ -268,7 +235,6 @@ def cleanup_history(history):
 
 def update_readme(stats):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
-    
     readme_content = f"""# Tor Bridges Collector & Archive
 
 This repository automatically collects, validates, and archives Tor bridges. A GitHub Action runs every 1 hours to fetch new bridges from the official Tor Project.
@@ -330,6 +296,36 @@ def send_to_telegram(file_path, caption):
     except Exception as e:
         log(f"Telegram Error: {e}")
 
+def rebuild_missing_files_from_history(history):
+    for target in TARGETS:
+        filename = target["file"]
+        bridge_path = os.path.join(BRIDGE_DIR, filename)
+        if os.path.exists(bridge_path):
+            continue
+        transport_target = target["type"].lower()
+        ip_target = target["ip"]
+        bridges_for_file = set()
+        for bridge_line, timestamp in history.items():
+            if not is_valid_bridge_line(bridge_line):
+                continue
+            host, port, transport = extract_connection_info(bridge_line)
+            if transport is None:
+                continue
+            # determine IP version from line
+            if "[" in bridge_line and "]" in bridge_line:
+                ip_ver = "IPv6"
+            elif re.search(r'\d+\.\d+\.\d+\.\d+', bridge_line):
+                ip_ver = "IPv4"
+            else:
+                ip_ver = "IPv4"  # default
+            if transport.lower() == transport_target.lower() and ip_ver == ip_target:
+                bridges_for_file.add(bridge_line)
+        if bridges_for_file:
+            with open(bridge_path, "w", encoding="utf-8") as f:
+                for bridge in sorted(bridges_for_file):
+                    f.write(bridge + "\n")
+            log(f"Rebuilt missing {filename} from history with {len(bridges_for_file)} bridges.")
+
 def main():
     session = requests.Session()
     session.headers.update({
@@ -338,6 +334,9 @@ def main():
     
     history = load_history()
     history = cleanup_history(history)
+    
+    # اگر فایل‌های txt موجود نباشند، از روی history ساخته می‌شوند
+    rebuild_missing_files_from_history(history)
     
     recent_cutoff_time = datetime.now() - timedelta(hours=RECENT_HOURS)
     stats = {}
@@ -379,7 +378,6 @@ def main():
                     for line in lines:
                         if is_valid_bridge_line(line):
                             fetched_bridges.add(line)
-                            
                             if line not in history:
                                 history[line] = datetime.now().isoformat()
                 else:
