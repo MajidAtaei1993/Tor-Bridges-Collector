@@ -408,7 +408,7 @@ def main():
     should_upload = (current_hour == 0 and IS_GITHUB) or (IS_GITHUB and TELEGRAM_UPLOAD)
     
     if should_upload:
-        zip_name = "tor_bridges.zip"
+        zip_name = "tor_bridges_collector.zip"
         zip_path = os.path.join(BRIDGE_DIR, zip_name)
         
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
