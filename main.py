@@ -8,6 +8,7 @@ import ssl
 import time
 import ipaddress
 import zipfile
+import shutil
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -21,7 +22,6 @@ TARGETS = [
     {"url": "https://bridges.torproject.org/bridges?transport=vanilla&ipv6=yes", "file": "vanilla_ipv6.txt", "type": "Vanilla", "ip": "IPv6"},
 ]
 
-HISTORY_FILE = "bridge_history.json"
 RECENT_HOURS = 72
 HISTORY_RETENTION_DAYS = 30
 REPO_URL = "https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main"
@@ -36,6 +36,8 @@ TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 BRIDGE_DIR = "bridge"
+HISTORY_FILE = os.path.join(BRIDGE_DIR, "bridge_history.json")
+
 if not os.path.exists(BRIDGE_DIR):
     os.makedirs(BRIDGE_DIR)
 
@@ -244,7 +246,8 @@ def load_history():
         try:
             with open(HISTORY_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            log(f"Error loading history: {e}")
             return {}
     return {}
 
@@ -434,11 +437,6 @@ def main():
 
     save_history(history)
     update_readme(stats)
-    
-    history_path = os.path.join(BRIDGE_DIR, HISTORY_FILE)
-    if os.path.exists(HISTORY_FILE):
-        import shutil
-        shutil.copy2(HISTORY_FILE, history_path)
     
     current_hour = datetime.now().hour
     if current_hour == 0 and IS_GITHUB:
