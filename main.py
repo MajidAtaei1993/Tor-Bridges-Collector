@@ -8,6 +8,7 @@ import ssl
 import time
 import ipaddress
 import zipfile
+import shutil
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
@@ -233,6 +234,26 @@ def cleanup_history(history):
     }
     return new_history
 
+def copy_existing_files_to_bridge():
+    for target in TARGETS:
+        filename = target["file"]
+        source_path = filename
+        dest_path = os.path.join(BRIDGE_DIR, filename)
+        if os.path.exists(source_path) and not os.path.exists(dest_path):
+            try:
+                shutil.copy2(source_path, dest_path)
+                log(f"Copied {filename} to {BRIDGE_DIR}/")
+            except Exception as e:
+                log(f"Error copying {filename}: {e}")
+    
+    old_history = "bridge_history.json"
+    if os.path.exists(old_history) and not os.path.exists(HISTORY_FILE):
+        try:
+            shutil.copy2(old_history, HISTORY_FILE)
+            log(f"Copied bridge_history.json to {BRIDGE_DIR}/")
+        except Exception as e:
+            log(f"Error copying bridge_history.json: {e}")
+
 def update_readme(stats):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
     readme_content = f"""# Tor Bridges Collector & Archive
@@ -296,37 +317,9 @@ def send_to_telegram(file_path, caption):
     except Exception as e:
         log(f"Telegram Error: {e}")
 
-def rebuild_missing_files_from_history(history):
-    for target in TARGETS:
-        filename = target["file"]
-        bridge_path = os.path.join(BRIDGE_DIR, filename)
-        if os.path.exists(bridge_path):
-            continue
-        transport_target = target["type"].lower()
-        ip_target = target["ip"]
-        bridges_for_file = set()
-        for bridge_line, timestamp in history.items():
-            if not is_valid_bridge_line(bridge_line):
-                continue
-            host, port, transport = extract_connection_info(bridge_line)
-            if transport is None:
-                continue
-            # determine IP version from line
-            if "[" in bridge_line and "]" in bridge_line:
-                ip_ver = "IPv6"
-            elif re.search(r'\d+\.\d+\.\d+\.\d+', bridge_line):
-                ip_ver = "IPv4"
-            else:
-                ip_ver = "IPv4"  # default
-            if transport.lower() == transport_target.lower() and ip_ver == ip_target:
-                bridges_for_file.add(bridge_line)
-        if bridges_for_file:
-            with open(bridge_path, "w", encoding="utf-8") as f:
-                for bridge in sorted(bridges_for_file):
-                    f.write(bridge + "\n")
-            log(f"Rebuilt missing {filename} from history with {len(bridges_for_file)} bridges.")
-
 def main():
+    copy_existing_files_to_bridge()
+    
     session = requests.Session()
     session.headers.update({
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -334,9 +327,6 @@ def main():
     
     history = load_history()
     history = cleanup_history(history)
-    
-    # اگر فایل‌های txt موجود نباشند، از روی history ساخته می‌شوند
-    rebuild_missing_files_from_history(history)
     
     recent_cutoff_time = datetime.now() - timedelta(hours=RECENT_HOURS)
     stats = {}
