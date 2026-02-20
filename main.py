@@ -269,7 +269,7 @@ Bridges discovered within the last 3 days.
 ### Full Archive (Since 2026-01-30)
 History of all collected bridges.
 
-| Transport | IPv4 (All Time) | Count | IPv6 (All Time) | Count |
+| Transport | IPv4 | Count | IPv6 | Count |
 | :--- | :--- | :--- | :--- | :--- |
 | **obfs4** | [obfs4.txt]({REPO_URL}/bridge/obfs4.txt) | **{stats.get('obfs4.txt', 0)}** | [obfs4_ipv6.txt]({REPO_URL}/bridge/obfs4_ipv6.txt) | **{stats.get('obfs4_ipv6.txt', 0)}** |
 | **WebTunnel** | [webtunnel.txt]({REPO_URL}/bridge/webtunnel.txt) | **{stats.get('webtunnel.txt', 0)}** | [webtunnel_ipv6.txt]({REPO_URL}/bridge/webtunnel_ipv6.txt) | **{stats.get('webtunnel_ipv6.txt', 0)}** |
