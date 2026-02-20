@@ -31,7 +31,7 @@ Bridges discovered within the last 3 days.
 ### Full Archive (Since 2026-01-30)
 History of all collected bridges.
 
-| Transport | IPv4 (All Time) | Count | IPv6 (All Time) | Count |
+| Transport | IPv4 | Count | IPv6 | Count |
 | :--- | :--- | :--- | :--- | :--- |
 | **obfs4** | [obfs4.txt](https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main/bridge/obfs4.txt) | **223** | [obfs4_ipv6.txt](https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main/bridge/obfs4_ipv6.txt) | **124** |
 | **WebTunnel** | [webtunnel.txt](https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main/bridge/webtunnel.txt) | **86** | [webtunnel_ipv6.txt](https://raw.githubusercontent.com/Delta-Kronecker/Tor-Bridges-Collector/refs/heads/main/bridge/webtunnel_ipv6.txt) | **86** |
